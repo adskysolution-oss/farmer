@@ -1,0 +1,18 @@
+import { getCurrentUser } from "@/lib/auth/session";
+import { fail, ok } from "@/lib/http";
+import { createPartner } from "@/lib/services/partners";
+
+export async function POST(request: Request) {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "ADMIN") {
+    return fail("Unauthorized", 401);
+  }
+
+  try {
+    const body = await request.json();
+    const result = await createPartner(body, user.id);
+    return ok(result, { status: 201 });
+  } catch (error) {
+    return fail(error instanceof Error ? error.message : "Unable to create partner");
+  }
+}

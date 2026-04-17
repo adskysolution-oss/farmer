@@ -1,0 +1,105 @@
+@import "@fontsource/manrope/400.css";
+@import "@fontsource/manrope/500.css";
+@import "@fontsource/manrope/600.css";
+@import "@fontsource/manrope/700.css";
+@import "@fontsource/space-grotesk/500.css";
+@import "@fontsource/space-grotesk/700.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 33% 98%;
+    --foreground: 221 42% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 221 42% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 221 42% 16%;
+    --primary: 218 84% 51%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 198 33% 94%;
+    --secondary-foreground: 222 47% 15%;
+    --muted: 210 28% 94%;
+    --muted-foreground: 215 20% 40%;
+    --accent: 173 79% 33%;
+    --accent-foreground: 180 100% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 146 64% 40%;
+    --success-foreground: 144 100% 98%;
+    --warning: 36 88% 52%;
+    --warning-foreground: 32 100% 12%;
+    --border: 214 30% 88%;
+    --input: 214 30% 88%;
+    --ring: 218 84% 51%;
+  }
+
+  .dark {
+    --background: 221 45% 8%;
+    --foreground: 210 40% 96%;
+    --card: 223 38% 12%;
+    --card-foreground: 210 40% 96%;
+    --popover: 223 38% 12%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 210 100% 64%;
+    --primary-foreground: 222 47% 10%;
+    --secondary: 223 26% 18%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 222 25% 19%;
+    --muted-foreground: 216 15% 73%;
+    --accent: 174 64% 40%;
+    --accent-foreground: 180 100% 97%;
+    --destructive: 0 73% 55%;
+    --destructive-foreground: 210 40% 96%;
+    --success: 146 57% 43%;
+    --success-foreground: 144 100% 97%;
+    --warning: 38 92% 57%;
+    --warning-foreground: 27 87% 10%;
+    --border: 223 20% 21%;
+    --input: 223 20% 21%;
+    --ring: 210 100% 64%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(circle at top left, rgba(29, 78, 216, 0.12), transparent 26%),
+      radial-gradient(circle at 90% 8%, rgba(15, 118, 110, 0.12), transparent 22%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 250, 252, 0.94));
+    min-height: 100vh;
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 28%),
+      radial-gradient(circle at 90% 8%, rgba(20, 184, 166, 0.1), transparent 24%),
+      linear-gradient(180deg, rgba(9, 14, 27, 0.98), rgba(13, 18, 33, 0.98));
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply rounded-3xl border border-white/50 bg-white/80 shadow-panel backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/55;
+  }
+
+  .panel-grid {
+    background-size: 28px 28px;
+    @apply bg-dashboard-grid;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

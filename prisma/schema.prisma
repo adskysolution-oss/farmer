@@ -1,0 +1,548 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  PARTNER
+  EMPLOYEE
+  CALLER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum PartnerStatus {
+  ACTIVE
+  INACTIVE
+  ON_HOLD
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum LoanStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  DOCUMENT_PENDING
+  APPROVED
+  REJECTED
+  DISBURSED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+  WAIVED
+}
+
+enum DocumentType {
+  AADHAAR
+  PAN
+  LAND_PAPER
+  BANK_DETAILS
+  OTHER
+}
+
+enum CallConnectionStatus {
+  CONNECTED
+  NOT_CONNECTED
+}
+
+enum LeadInterestStatus {
+  INTERESTED
+  NOT_INTERESTED
+  DOCUMENTS_PENDING
+  FOLLOW_UP
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum WalletOwnerType {
+  PARTNER
+  EMPLOYEE
+}
+
+enum LedgerEntryType {
+  CREDIT
+  DEBIT
+  COMMISSION
+  SALARY
+  WITHDRAWAL
+  ADJUSTMENT
+  PAYMENT
+}
+
+enum CampaignChannel {
+  WHATSAPP
+  SMS
+  EMAIL
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENT
+  FAILED
+}
+
+enum RecipientGroup {
+  FARMERS
+  PARTNERS
+  EMPLOYEES
+}
+
+enum PaymentGateway {
+  RAZORPAY
+  PHONEPE
+  KESARI
+}
+
+enum PayoutMethod {
+  MANUAL
+  BANK
+  UPI
+}
+
+enum FormFieldType {
+  TEXT
+  NUMBER
+  SELECT
+  DATE
+  TEXTAREA
+  FILE
+  RADIO
+  CHECKBOX
+}
+
+model User {
+  id                   String                @id @default(cuid())
+  name                 String
+  email                String?               @unique
+  mobile               String                @unique
+  passwordHash         String
+  role                 UserRole
+  status               UserStatus            @default(ACTIVE)
+  avatarUrl            String?
+  lastLoginAt          DateTime?
+  partner              Partner?
+  employee             Employee?
+  auditLogs            AuditLog[]
+  sentCampaigns        Campaign[]            @relation("CampaignSender")
+  passwordResetTokens  PasswordResetToken[]
+  uploadedDocuments    FarmerDocument[]      @relation("DocumentUploader")
+  verifiedApplications LoanApplication[]     @relation("ApplicationVerifier")
+  timelineEntries      ApplicationTimeline[] @relation("TimelineActor")
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  @@index([role, status])
+}
+
+model Partner {
+  id                    String            @id @default(cuid())
+  userId                String            @unique
+  code                  String            @unique
+  state                 String
+  district              String
+  tehsil                String
+  address               String?
+  status                PartnerStatus     @default(ACTIVE)
+  revenuePaise          Int               @default(0)
+  commissionEarnedPaise Int               @default(0)
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employees             Employee[]
+  applications          LoanApplication[]
+  wallet                Wallet?
+  commissionSplits      CommissionSplit[]
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@index([status, state, district, tehsil])
+}
+
+model Employee {
+  id                   String              @id @default(cuid())
+  userId               String              @unique
+  partnerId            String?
+  designation          String
+  state                String
+  district             String
+  tehsil               String?
+  village              String?
+  status               EmployeeStatus      @default(ACTIVE)
+  isCaller             Boolean             @default(false)
+  fixedSalaryPaise     Int                 @default(0)
+  commissionRate       Float               @default(0)
+  leadsGenerated       Int                 @default(0)
+  conversions          Int                 @default(0)
+  performanceScore     Float               @default(0)
+  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  partner              Partner?            @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  assignedApplications LoanApplication[]   @relation("AssignedEmployee")
+  callerApplications   LoanApplication[]   @relation("AssignedCaller")
+  tracking             EmployeeTracking[]
+  wallet               Wallet?
+  commissionSplits     CommissionSplit[]
+  callLogs             CallLog[]
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@index([partnerId, status])
+  @@index([isCaller])
+}
+
+model Farmer {
+  id           String            @id @default(cuid())
+  name         String
+  mobile       String
+  email        String?
+  state        String
+  district     String
+  tehsil       String?
+  village      String
+  source       String            @default("SELF_SERVICE")
+  notes        String?
+  applications LoanApplication[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([mobile])
+  @@index([state, district, village])
+}
+
+model LoanApplication {
+  id                   String                @id @default(cuid())
+  referenceNo          String                @unique
+  farmerId             String
+  partnerId            String?
+  employeeId           String?
+  callerId             String?
+  verifiedById         String?
+  loanType             String
+  requestedAmountPaise Int?
+  status               LoanStatus            @default(SUBMITTED)
+  paymentStatus        PaymentStatus         @default(PENDING)
+  paymentRequired      Boolean               @default(true)
+  paymentAmountPaise   Int                   @default(24900)
+  callConnectionStatus CallConnectionStatus?
+  leadInterestStatus   LeadInterestStatus?
+  followUpDate         DateTime?
+  callerNotes          String?
+  assignedToCallerAt   DateTime?
+  reviewedAt           DateTime?
+  approvedAt           DateTime?
+  rejectedAt           DateTime?
+  disbursedAt          DateTime?
+  rejectionReason      String?
+  documentCompletion   Float                 @default(0)
+  submittedAt          DateTime              @default(now())
+  farmer               Farmer                @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  partner              Partner?              @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  assignedEmployee     Employee?             @relation("AssignedEmployee", fields: [employeeId], references: [id], onDelete: SetNull)
+  assignedCaller       Employee?             @relation("AssignedCaller", fields: [callerId], references: [id], onDelete: SetNull)
+  verifiedBy           User?                 @relation("ApplicationVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
+  payment              Payment?
+  documents            FarmerDocument[]
+  timeline             ApplicationTimeline[]
+  callLogs             CallLog[]
+  commissionSplit      CommissionSplit?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  @@index([status, paymentStatus])
+  @@index([partnerId, employeeId, callerId])
+  @@index([submittedAt])
+}
+
+model FarmerDocument {
+  id            String          @id @default(cuid())
+  applicationId String
+  uploadedById  String?
+  type          DocumentType
+  fileName      String
+  filePath      String
+  mimeType      String
+  sizeBytes     Int
+  application   LoanApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  uploadedBy    User?           @relation("DocumentUploader", fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([applicationId, type])
+}
+
+model Payment {
+  id              String          @id @default(cuid())
+  applicationId   String?         @unique
+  gateway         PaymentGateway
+  orderId         String?
+  transactionId   String?         @unique
+  status          PaymentStatus   @default(PENDING)
+  amountPaise     Int
+  currency        String          @default("INR")
+  payerName       String
+  payerMobile     String
+  metaJson        String?
+  paidAt          DateTime?
+  application     LoanApplication? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  commissionSplit CommissionSplit?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([status, gateway, createdAt])
+}
+
+model PaymentGatewayConfig {
+  id            String         @id @default(cuid())
+  gateway       PaymentGateway @unique
+  displayName   String
+  enabled       Boolean        @default(false)
+  keyId         String?
+  secretKey     String?
+  merchantId    String?
+  saltKey       String?
+  saltIndex     String?
+  endpointUrl   String?
+  successUrl    String?
+  failureUrl    String?
+  webhookSecret String?
+  extraJson     String?
+  updatedById   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Wallet {
+  id                     String            @id @default(cuid())
+  ownerType              WalletOwnerType
+  partnerId              String?           @unique
+  employeeId             String?           @unique
+  balancePaise           Int               @default(0)
+  lifetimeEarningsPaise  Int               @default(0)
+  pendingWithdrawalPaise Int               @default(0)
+  partner                Partner?          @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  employee               Employee?         @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  ledgerEntries          WalletEntry[]
+  withdrawals            WithdrawalRequest[]
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+}
+
+model WalletEntry {
+  id            String          @id @default(cuid())
+  walletId       String
+  type          LedgerEntryType
+  amountPaise   Int
+  description   String
+  referenceType String?
+  referenceId   String?
+  wallet        Wallet          @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  createdAt     DateTime        @default(now())
+
+  @@index([walletId, createdAt])
+}
+
+model WithdrawalRequest {
+  id            String           @id @default(cuid())
+  walletId       String
+  amountPaise   Int
+  status        WithdrawalStatus @default(PENDING)
+  payoutMethod  PayoutMethod     @default(MANUAL)
+  notes         String?
+  processedById String?
+  processedAt   DateTime?
+  wallet        Wallet           @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model CommissionSetting {
+  id                       String   @id @default(cuid())
+  adminSharePercent        Float    @default(40)
+  partnerSharePercent      Float    @default(35)
+  employeeSharePercent     Float    @default(25)
+  fixedEmployeeSalaryPaise Int      @default(0)
+  updatedById              String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+}
+
+model CommissionSplit {
+  id                  String          @id @default(cuid())
+  paymentId           String          @unique
+  applicationId       String          @unique
+  partnerId           String?
+  employeeId          String?
+  adminAmountPaise    Int
+  partnerAmountPaise  Int
+  employeeAmountPaise Int
+  snapshotJson        String
+  payment             Payment         @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  application         LoanApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  partner             Partner?        @relation(fields: [partnerId], references: [id], onDelete: SetNull)
+  employee            Employee?       @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  createdAt           DateTime        @default(now())
+
+  @@index([partnerId, employeeId])
+}
+
+model EmployeeTracking {
+  id         String   @id @default(cuid())
+  employeeId String
+  latitude   Float
+  longitude  Float
+  lastActive DateTime @default(now())
+  isOnline   Boolean  @default(true)
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([employeeId, lastActive])
+  @@map("employee_tracking")
+}
+
+model CallLog {
+  id               String               @id @default(cuid())
+  applicationId    String
+  callerId         String
+  connectionStatus CallConnectionStatus
+  interestStatus   LeadInterestStatus
+  notes            String?
+  followUpDate     DateTime?
+  application      LoanApplication      @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  caller           Employee             @relation(fields: [callerId], references: [id], onDelete: Cascade)
+  createdAt        DateTime             @default(now())
+
+  @@index([applicationId, createdAt])
+}
+
+model Campaign {
+  id             String            @id @default(cuid())
+  name           String
+  channel        CampaignChannel
+  recipientGroup RecipientGroup
+  message        String
+  status         CampaignStatus    @default(DRAFT)
+  filtersJson    String?
+  sentById       String
+  scheduledAt    DateTime?
+  sentAt         DateTime?
+  sentBy         User              @relation("CampaignSender", fields: [sentById], references: [id], onDelete: Cascade)
+  dispatches     CampaignDispatch[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model CampaignDispatch {
+  id               String   @id @default(cuid())
+  campaignId       String
+  recipientType    String
+  recipientId      String
+  recipientLabel   String
+  status           String
+  providerResponse String?
+  campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+
+  @@index([campaignId, createdAt])
+}
+
+model DynamicForm {
+  id                 String             @id @default(cuid())
+  name               String             @unique
+  title              String
+  description        String?
+  paymentEnabled     Boolean            @default(true)
+  paymentMandatory   Boolean            @default(true)
+  paymentAmountPaise Int                @default(24900)
+  published          Boolean            @default(true)
+  fields             DynamicFormField[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+}
+
+model DynamicFormField {
+  id          String        @id @default(cuid())
+  formId       String
+  label       String
+  key         String
+  type        FormFieldType
+  required    Boolean       @default(false)
+  placeholder String?
+  optionsJson String?
+  sortOrder   Int           @default(0)
+  form        DynamicForm   @relation(fields: [formId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([formId, sortOrder])
+}
+
+model Setting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorId     String?
+  entityType  String
+  entityId    String
+  action      String
+  description String
+  metaJson    String?
+  actor       User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId, createdAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId, expiresAt])
+}
+
+model ApplicationTimeline {
+  id            String          @id @default(cuid())
+  applicationId String
+  actorId       String?
+  title         String
+  description   String
+  status        String
+  application   LoanApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  actor         User?           @relation("TimelineActor", fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt     DateTime        @default(now())
+
+  @@index([applicationId, createdAt])
+}

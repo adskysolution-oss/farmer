@@ -1,0 +1,11 @@
+node_modules
+.next
+.turbo
+.npm-cache
+coverage
+dist
+storage/documents/*
+!storage/documents/.gitkeep
+prisma/dev.db
+prisma/dev.db-journal
+.env
