@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { PublicApplicationForm } from "@/components/forms/public-application-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { getSettingsBundle } from "@/lib/services/operations";
