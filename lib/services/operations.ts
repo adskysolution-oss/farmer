@@ -135,22 +135,20 @@ export async function updateSettingsBundle(input: {
   }>;
 }, actorId: string) {
   if (input.settings) {
-    await Promise.all(
-      Object.entries(input.settings).map(([key, value]) =>
-        prisma.setting.upsert({
-          where: { key },
-          create: {
-            key,
-            value,
-            updatedById: actorId,
-          },
-          update: {
-            value,
-            updatedById: actorId,
-          },
-        }),
-      ),
-    );
+    for (const [key, value] of Object.entries(input.settings)) {
+      await prisma.setting.upsert({
+        where: { key },
+        create: {
+          key,
+          value,
+          updatedById: actorId,
+        },
+        update: {
+          value,
+          updatedById: actorId,
+        },
+      });
+    }
   }
 
   if (input.gateways?.length) {

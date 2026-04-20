@@ -37,7 +37,9 @@ export default async function DashboardPage() {
       <section className="grid gap-4 md:grid-cols-3">
         <div className="glass-panel p-6">
           <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
-          <p className="mt-3 font-display text-3xl font-semibold">{formatCompactCurrency(summary.metrics.totalRevenue)}</p>
+          <p className="mt-3 font-display text-3xl font-semibold" suppressHydrationWarning>
+            {formatCompactCurrency(summary.metrics.totalRevenue)}
+          </p>
         </div>
         <div className="glass-panel p-6">
           <p className="text-sm font-medium text-muted-foreground">Today New Registrations</p>

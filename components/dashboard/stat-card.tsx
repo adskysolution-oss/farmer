@@ -22,7 +22,7 @@ export function StatCard({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-medium text-muted-foreground">{label}</p>
-            <p className="mt-3 font-display text-3xl font-semibold">{value}</p>
+            <p className="mt-3 font-display text-3xl font-semibold" suppressHydrationWarning>{value}</p>
             {hint ? (
               <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground">
                 <ArrowUpRight className="h-3.5 w-3.5 text-success" />

@@ -119,7 +119,9 @@ export function OverviewCharts({
                     <p className="font-semibold">{item.label}</p>
                     <p className="text-sm text-muted-foreground">{item.leads} converted leads</p>
                   </div>
-                  <p className="font-display text-xl font-semibold">{formatCompactCurrency(item.revenue)}</p>
+                  <p className="font-display text-xl font-semibold" suppressHydrationWarning>
+                    {formatCompactCurrency(item.revenue)}
+                  </p>
                 </div>
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-secondary">
                   <div className="h-full rounded-full bg-gradient-to-r from-primary to-accent" style={{ width: `${Math.min(100, item.leads * 12)}%` }} />

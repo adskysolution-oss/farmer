@@ -10,6 +10,7 @@ export function formatCurrencyFromPaise(value = 0) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
+    minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(value / 100);
 }
@@ -19,6 +20,7 @@ export function formatCompactCurrency(value = 0) {
     style: "currency",
     currency: "INR",
     notation: "compact",
+    minimumFractionDigits: 0,
     maximumFractionDigits: 1,
   }).format(value / 100);
 }
