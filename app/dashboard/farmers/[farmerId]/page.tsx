@@ -1,5 +1,10 @@
 import { ArrowLeft } from "lucide-react";
 
+import { FarmerStatusDialog } from "@/components/forms/farmer-status-dialog";
+import { AssignCallerDialog } from "@/components/forms/assign-caller-dialog";
+import { DocumentUploadDialog } from "@/components/forms/document-upload-dialog";
+import { listEmployees } from "@/lib/services/employees";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +26,7 @@ export default async function FarmerDetailPage({
   }
 
   const latestApplication = farmer.applications[0];
+  const callerOptions = (await listEmployees({}, {})).items.filter(e => e.isCaller).map(c => ({ id: c.id, label: c.user.name }));
 
   return (
     <div className="space-y-6">
@@ -48,9 +54,15 @@ export default async function FarmerDetailPage({
 
           <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
             <Card>
-              <CardHeader>
-                <CardTitle>Application Overview</CardTitle>
-                <CardDescription>Reference, ownership, and loan progress snapshot.</CardDescription>
+              <CardHeader className="flex flex-row items-start justify-between space-y-0">
+                <div>
+                  <CardTitle>Application Overview</CardTitle>
+                  <CardDescription>Reference, ownership, and loan progress snapshot.</CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <FarmerStatusDialog applicationId={latestApplication.id} currentStatus={latestApplication.status} />
+                  <AssignCallerDialog applicationId={latestApplication.id} currentCallerId={latestApplication.callerId || undefined} callers={callerOptions} />
+                </div>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
                 <div className="flex justify-between"><span className="text-muted-foreground">Reference</span><span className="font-medium">{latestApplication.referenceNo}</span></div>
@@ -67,9 +79,12 @@ export default async function FarmerDetailPage({
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Document Management</CardTitle>
-                <CardDescription>Aadhaar, PAN, land papers, bank details, and replacements tracked by application.</CardDescription>
+              <CardHeader className="flex flex-row items-start justify-between space-y-0">
+                <div>
+                  <CardTitle>Document Management</CardTitle>
+                  <CardDescription>Aadhaar, PAN, land papers, bank details, and replacements tracked by application.</CardDescription>
+                </div>
+                <DocumentUploadDialog applicationId={latestApplication.id} />
               </CardHeader>
               <CardContent className="p-0">
                 <Table>
@@ -78,6 +93,7 @@ export default async function FarmerDetailPage({
                       <TableHead>Type</TableHead>
                       <TableHead>File Name</TableHead>
                       <TableHead>Mime Type</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -90,6 +106,9 @@ export default async function FarmerDetailPage({
                           </a>
                         </TableCell>
                         <TableCell>{document.mimeType}</TableCell>
+                        <TableCell>
+                          <DocumentUploadDialog applicationId={latestApplication.id} documentType={document.type} isReplace={true} />
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

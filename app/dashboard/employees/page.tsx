@@ -1,5 +1,8 @@
+import { Download, FileText, Sheet } from "lucide-react";
+
 import { EmployeeFormDialog } from "@/components/forms/employee-form-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -28,7 +31,29 @@ export default async function EmployeesPage({
       <SectionHeader
         title="Employee Management"
         description="Assign partners, monitor lead volume, review conversion rates, and manage caller versus field operations roles."
-        actions={user.role !== "CALLER" ? <EmployeeFormDialog partners={partners.items.map((partner) => ({ id: partner.id, label: `${partner.code} • ${partner.user.name}` }))} /> : null}
+        actions={
+          <>
+            <Button variant="outline" asChild>
+              <a href="/api/exports/employees?format=csv">
+                <Download className="mr-2 h-4 w-4" />
+                CSV
+              </a>
+            </Button>
+            <Button variant="outline" asChild>
+              <a href="/api/exports/employees?format=pdf">
+                <FileText className="mr-2 h-4 w-4" />
+                PDF
+              </a>
+            </Button>
+            <Button variant="outline" asChild>
+              <a href="/api/exports/employees?format=xlsx">
+                <Sheet className="mr-2 h-4 w-4" />
+                Excel
+              </a>
+            </Button>
+            {user.role !== "CALLER" ? <EmployeeFormDialog partners={partners.items.map((partner) => ({ id: partner.id, label: `${partner.code} • ${partner.user.name}` }))} /> : null}
+          </>
+        }
       />
 
       <Card>

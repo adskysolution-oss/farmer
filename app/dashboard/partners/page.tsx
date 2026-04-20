@@ -1,4 +1,4 @@
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, Sheet } from "lucide-react";
 
 import { PartnerFormDialog } from "@/components/forms/partner-form-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +41,12 @@ export default async function PartnersPage({
                 PDF
               </a>
             </Button>
+            <Button variant="outline" asChild>
+              <a href="/api/exports/partners?format=xlsx">
+                <Sheet className="mr-2 h-4 w-4" />
+                Excel
+              </a>
+            </Button>
             {user.role === "ADMIN" ? <PartnerFormDialog /> : null}
           </>
         }
@@ -48,12 +54,14 @@ export default async function PartnersPage({
 
       <Card>
         <CardContent className="p-4">
-          <form className="grid gap-3 md:grid-cols-5">
+          <form className="grid gap-3 md:grid-cols-3 xl:grid-cols-7">
             <input name="search" defaultValue={params.search || ""} className="h-11 rounded-2xl border border-border bg-card px-4 text-sm" placeholder="Search name, code, mobile..." />
             <input name="state" defaultValue={params.state || ""} className="h-11 rounded-2xl border border-border bg-card px-4 text-sm" placeholder="State" />
             <input name="district" defaultValue={params.district || ""} className="h-11 rounded-2xl border border-border bg-card px-4 text-sm" placeholder="District" />
             <input name="tehsil" defaultValue={params.tehsil || ""} className="h-11 rounded-2xl border border-border bg-card px-4 text-sm" placeholder="Tehsil" />
-            <Button type="submit">Apply Filters</Button>
+            <input type="date" name="date" defaultValue={params.date || ""} className="h-11 rounded-2xl border border-border bg-card px-4 text-sm" />
+            <input type="number" name="revenue" defaultValue={params.revenue || ""} className="h-11 rounded-2xl border border-border bg-card px-4 text-sm" placeholder="Min Revenue" />
+            <Button type="submit" className="h-11 rounded-2xl bg-primary px-4 text-sm font-semibold text-primary-foreground">Apply Filters</Button>
           </form>
         </CardContent>
       </Card>

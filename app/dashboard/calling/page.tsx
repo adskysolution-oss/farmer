@@ -1,4 +1,5 @@
 import { CallingActions } from "@/components/forms/calling-actions";
+import { CallerFeedbackDialog } from "@/components/forms/caller-feedback-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -42,6 +43,7 @@ export default async function CallingPage() {
                 <TableHead>Call Status</TableHead>
                 <TableHead>Interest</TableHead>
                 <TableHead>Follow Up</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -59,6 +61,9 @@ export default async function CallingPage() {
                     </TableCell>
                     <TableCell>{lead.leadInterestStatus || latestCall?.interestStatus || "—"}</TableCell>
                     <TableCell>{formatDateTime(lead.followUpDate || latestCall?.followUpDate)}</TableCell>
+                    <TableCell>
+                      <CallerFeedbackDialog applicationId={lead.id} />
+                    </TableCell>
                   </TableRow>
                 );
               })}

@@ -1,5 +1,8 @@
+import { Download, FileText, Sheet } from "lucide-react";
+
 import { FarmerFormDialog } from "@/components/forms/farmer-form-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -34,11 +37,31 @@ export default async function FarmersPage({
         title="Farmer Management"
         description="Track loan status flow, payment state, document completeness, caller assignment, and operator ownership in one pipeline."
         actions={
-          <FarmerFormDialog
-            partners={partners.items.map((partner) => ({ id: partner.id, label: `${partner.code} • ${partner.user.name}` }))}
-            employees={employees.items.map((employee) => ({ id: employee.id, label: employee.user.name }))}
-            callers={callerOptions.map((employee) => ({ id: employee.id, label: employee.user.name }))}
-          />
+          <>
+            <Button variant="outline" asChild>
+              <a href="/api/exports/farmers?format=csv">
+                <Download className="mr-2 h-4 w-4" />
+                CSV
+              </a>
+            </Button>
+            <Button variant="outline" asChild>
+              <a href="/api/exports/farmers?format=pdf">
+                <FileText className="mr-2 h-4 w-4" />
+                PDF
+              </a>
+            </Button>
+            <Button variant="outline" asChild>
+              <a href="/api/exports/farmers?format=xlsx">
+                <Sheet className="mr-2 h-4 w-4" />
+                Excel
+              </a>
+            </Button>
+            <FarmerFormDialog
+              partners={partners.items.map((partner) => ({ id: partner.id, label: `${partner.code} • ${partner.user.name}` }))}
+              employees={employees.items.map((employee) => ({ id: employee.id, label: employee.user.name }))}
+              callers={callerOptions.map((employee) => ({ id: employee.id, label: employee.user.name }))}
+            />
+          </>
         }
       />
 

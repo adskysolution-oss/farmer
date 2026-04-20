@@ -1,5 +1,8 @@
+import { Download, FileText, Sheet } from "lucide-react";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SectionHeader } from "@/components/ui/section-header";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getSettingsBundle, listPayments } from "@/lib/services/operations";
@@ -12,7 +15,32 @@ export default async function PaymentsPage() {
 
   return (
     <div className="space-y-6">
-      <SectionHeader title="Payment System" description="Track application payments, gateway switching, verification state, and transaction logging." />
+      <SectionHeader 
+        title="Payment System" 
+        description="Track application payments, gateway switching, verification state, and transaction logging." 
+        actions={
+          <>
+            <Button variant="outline" asChild>
+              <a href="/api/exports/payments?format=csv">
+                <Download className="mr-2 h-4 w-4" />
+                CSV
+              </a>
+            </Button>
+            <Button variant="outline" asChild>
+              <a href="/api/exports/payments?format=pdf">
+                <FileText className="mr-2 h-4 w-4" />
+                PDF
+              </a>
+            </Button>
+            <Button variant="outline" asChild>
+              <a href="/api/exports/payments?format=xlsx">
+                <Sheet className="mr-2 h-4 w-4" />
+                Excel
+              </a>
+            </Button>
+          </>
+        }
+      />
 
       <section className="grid gap-4 md:grid-cols-3">
         {settings.gateways.map((gateway) => (

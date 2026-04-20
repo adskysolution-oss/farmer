@@ -8,6 +8,8 @@ import { GatewayForm } from "@/components/settings/gateway-form";
 import { CaptchaForm } from "@/components/settings/captcha-form";
 import { MailForm } from "@/components/settings/mail-form";
 import { HidePageForm } from "@/components/settings/hidepage-form";
+import { CommissionForm } from "@/components/settings/commission-form";
+import { SmsApiForm } from "@/components/settings/sms-api-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SectionHeader } from "@/components/ui/section-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,8 +26,10 @@ export default async function SettingsPage() {
     { value: "color", label: "Colour", component: ColourForm },
     { value: "font", label: "Font", component: FontForm },
     { value: "gateway", label: "Gateway", component: GatewayForm },
-    { value: "captcha", label: "Captcha", component: CaptchaForm },
+    { value: "commission", label: "Commission", component: CommissionForm },
     { value: "mail", label: "Mail Integration", component: MailForm },
+    { value: "sms", label: "SMS API", component: SmsApiForm },
+    { value: "captcha", label: "Captcha", component: CaptchaForm },
     { value: "hide", label: "Hide Page", component: HidePageForm },
   ];
 
